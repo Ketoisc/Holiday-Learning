@@ -1,7 +1,7 @@
 #include <iostream>
+#include <queue>
 using namespace std;
-#include <iostream>
-using namespace std;
+
 
 // adjacency lists can efficiently represent sparse graphs 
 // using linked lists to store the neighbours adjacent to each vertex
@@ -94,10 +94,21 @@ void print_graph(graph* graph) {
 
 void initialise_search(graph* graph) {
     for (int i = 0; i < graph->numVertices; i++) {
-        graph->processed[i]
+        graph->processed[i] = false;
+        graph->discovered[i] = false;
+        graph->parent[i] = -1;
     }
 }
 
+void bfs(graph* graph, int start) {
+    queue<int> queue;
+    int currVert;
+    int successorVert;
+    edgenode* tempNode;
+
+    init_queue(&queue);
+    enqueue(&queue, start);
+}
 
 int main() {
     graph graph;
