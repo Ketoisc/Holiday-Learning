@@ -67,10 +67,14 @@ void read_graph(graph* graph, bool isDirected) {
     cout << "Enter the number of vertices and edges seperated by a space: ";
     cin >> (graph->numVertices) >> numEdges; // takes user input for num of vertices and edges
 
-    for (int i = 0; i < numEdges; i++) { // repeatedly ask for user input
-        cout << i << " - Enter the two vertices to create an edge: ";
-        cin >> x >> y;
-        insert_edge(graph, x, y, isDirected); // insert the given edge
+    // note: no input sanitation. assumes the inputs are valid
+    for (int j = 0; j < graph->numVertices; j++) {
+        cout << "Vertex " << j << endl;
+        for (int i = 1; i <= numEdges; i++) { // repeatedly ask for user input
+            cout << "Edge " << i << " - Enter the connecting vertex to create an edge: ";
+            cin >> y;
+            insert_edge(graph, j, y, isDirected); // insert the given edge
+        }
     }
     return;
 }
@@ -91,7 +95,7 @@ void print_graph(graph* graph) {
     return;
 }
 
-
+// initialising the graph so each vertex is initialised as undiscovered/unprocessed with no parents
 void initialise_search(graph* graph) {
     for (int i = 0; i < graph->numVertices; i++) {
         graph->processed[i] = false;
@@ -100,15 +104,69 @@ void initialise_search(graph* graph) {
     }
 }
 
-void bfs(graph* graph, int start) {
-    queue<int> queue;
-    int currVert;
-    int successorVert;
-    edgenode* tempNode;
-
-    init_queue(&queue);
-    enqueue(&queue, start);
+void process_vertex_early(int vertex) { // can be adjusted to have other functionality
+    cout << "Processed vertex " << vertex << endl;
+    return;
 }
+
+void process_vertex_late(int vertex) {} // can be adjusted to have other functionality
+
+void process_edge(int x, int y) { // processes edges, counts num of edges traversed
+    cout << "Processed edge " << x << " " << y << endl;
+    static int edgesCount = 0;
+    edgesCount++;
+    cout << "Current edge count: " << edgesCount << "\n" << endl;
+    return;
+}
+
+// breadth first search
+void bfs(graph* graph, int start) {
+    queue<int> queue; // initialise queue (FIFO)
+    int currVert; // current vertex being explored
+    int successorVert; // neighbouring vertex connected to currVert
+    edgenode* currNode; // points to the edges/connections of the current vertex currVert
+
+    queue.push(start); // insert the starting vertex into the queue
+    graph->discovered[start] = true; // first/starting vertex has been marked as discovered
+
+    while (!queue.empty()) { // continue searching until queue is empty/no more vertices left to search
+        currVert = queue.front(); // set current vertex as the first value in the queue
+        queue.pop(); // remove value from queue
+        process_vertex_early(currVert); // can be commented out. depending on the wanted functionality of bfs, you can process the node early or late
+        graph->processed[currVert] = true; // set this node as processed
+        currNode = graph->edges[currVert]; // check current node's edges/connections with other nodes by accessing its adjacency list
+        //currNode is now one of the connected vertices to the current vertex
+
+        while (currNode != NULL) { // while there are still neighbours to the node/s, traverse all neighbours of currVert using its adjacency list
+            successorVert = currNode->y; // set successor vertex to check if it has been discovered/processed before
+            
+             // if the successor vertex has NOT been processed, or the graph is directed
+             // condition 1 is to satisfy undirected graphs, because the same edge will appear twice. you don't want to process the same thing twice, so we check that
+             // condition 2 is to ensure that every edge is only processed once, because direction matters in directed graphs. 
+             // already processed vertices will never be processed again, because only undiscovered vertices are added to the queue
+             // need to process every edge because direction matters in directed graphs. wont be an infinite loop since currNode changes
+            if ((graph->processed[successorVert] == false) || graph->isDirected) {
+            // focuses on processing edges
+                process_edge(currVert, successorVert); // process the edge
+            }
+
+            // only undiscovered nodes are added to the queue
+            if (graph->discovered[successorVert] == false) { // if successorVert has not been marked as discovered
+            // focuses on node traversal
+                queue.push(successorVert); // add successor to the queue to be checked
+                graph->discovered[successorVert] = true; // mark as discovered
+                graph->parent[successorVert] = currVert; // define the current vertex as the parent of the successor
+            }
+            // both if statements are called if the successorVert is undiscovered. ensures that the edge is processed and the node can be further explored
+
+            // follow the adjacency list pointer to go to next one
+            currNode = currNode->next; // go to next edge node, aka the next item in the adjaency list or the next neighbour/connection vertex
+        }
+        process_vertex_late(currVert); // process if wanted
+    }
+
+}
+
 
 int main() {
     graph graph;
@@ -116,5 +174,8 @@ int main() {
     read_graph(&graph, true);
     insert_edge(&graph, 1, 2, true);
     print_graph(&graph);
+
+    initialise_search(&graph);
+    bfs(&graph, 0);
 }
 
