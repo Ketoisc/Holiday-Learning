@@ -19,7 +19,7 @@ struct graph {
     int numVertices; // num of vertices in the graph
     int numEdges; // num of edges in the graph
     bool isDirected; // is the graph directed? (edges only go from one to the other, not both ways)
-    bool processed[6];
+    bool processed[6]; // arrays for traversal and search
     bool discovered[6];
     int parent[6];
 };
@@ -57,7 +57,7 @@ void insert_edge(graph* graph, int x, int y, bool isDirected) {
     return;
 }
 
-void read_graph(graph* graph, bool isDirected) {
+void read_graph(graph* graph, bool isDirected) { // aka setting up the graph with values
     int numEdges;
     int x; // starting vertex x in edge
     int y; // ending vertex y in edge
@@ -79,7 +79,7 @@ void read_graph(graph* graph, bool isDirected) {
     return;
 }
 
-void print_graph(graph* graph) {
+void print_graph(graph* graph) { // prints each vertices and their connections/edges with other vertices
     edgenode* node; // temporary node holder to be used for printing
 
     for (int i = 0; i < graph->numVertices; i++) { // for each array index (num of vertices)
