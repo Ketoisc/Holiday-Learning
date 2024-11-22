@@ -3,7 +3,7 @@
 using namespace std;
 
 // PRIORITY QUEUE
-// allows new elements to enter a system. stores elements of a SORTED array in reverse order (largest value on top)
+// allows new elements to enter a system. stores elements of an array in sorted order (largest value on top) IF it is a max-heap
 // in general, largest element is also on top for all queues no matter if the array is sorted. queue will sort for you
 // can push and pop elements
 int main()
@@ -13,7 +13,7 @@ int main()
     // defining priority queue
     priority_queue<int> pq;
 
-    // printing array
+    // printing array. normal order of values is kept
     cout << "Array: ";
     for (auto i : arr) {
         cout << i << ' ';
@@ -25,7 +25,7 @@ int main()
     }
 
     // printing priority queue
-    cout << "Priority Queue: ";
+    cout << "Priority Queue: "; // prints queue in desceneing order, largest value first
     while (!pq.empty()) {
         cout << pq.top() << ' '; // prints top value
         pq.pop(); // removes value
