@@ -189,13 +189,13 @@ void bfs(graph* graph, int start) {
 
 void two_colour(graph* graph) {
     for (int i = 0; i < graph->numVertices; i++) {
-        graph->colour[i] = "UNCOLOURED";
+        graph->colour[i] = "UNCOLOURED"; // initialise every vertex as uncoloured
     }
-    graph->bipartite = true;
+    graph->bipartite = true; // initially set bipartite to true, will be changed to false if matching coloured vertices are found
     initialise_search(graph);
 
     for (int i = 0; i < graph->numVertices; i++) {
-        if (graph->discovered[i] == false) {
+        if (graph->discovered[i] == false) { // for each undiscovered vertex, set the colour to white and run the bfs to process/colour all other connected vertices
             graph->colour[i] = "WHITE";
             bfs(graph, i);
         }
