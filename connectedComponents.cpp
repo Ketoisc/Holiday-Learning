@@ -27,7 +27,7 @@ struct graph {
 void initialise_graph(graph* graph, bool isDirected) {
     graph->numVertices = 0; // setting graph as empty
     graph->numEdges = 0;
-    graph->isDirected = true;
+    graph->isDirected = isDirected;
 
     for (int i = 0; i < 6; i++) {
         graph->degree[i] = 0;
@@ -187,7 +187,6 @@ int main() {
     insert_edge(&graph, 1, 2, true);
     print_graph(&graph);
 
-    initialise_search(&graph);
-    bfs(&graph, 0);
+    connected_components(&graph);
 }
 

@@ -26,14 +26,14 @@ struct graph {
     int parent[6];
 
     // arrays for coloured graphs and bipartite check
-    char* colour[6];
+    string colour[6];
     bool bipartite;
 };
 
 void initialise_graph(graph* graph, bool isDirected) {
     graph->numVertices = 0; // setting graph as empty
     graph->numEdges = 0;
-    graph->isDirected = true;
+    graph->isDirected = isDirected;
 
     for (int i = 0; i < 6; i++) {
         graph->degree[i] = 0;
@@ -117,7 +117,7 @@ void process_vertex_early(int vertex) { // can be adjusted to have other functio
 
 void process_vertex_late(int vertex) {} // can be adjusted to have other functionality
 
-char* complement(char* colour) {
+string complement(string colour) {
     if (colour == "WHITE") {
         return "BLACK";
     }
@@ -136,6 +136,7 @@ void process_edge(graph* graph, int x, int y) { // processes edges, checks for a
         return;
     }
     graph->colour[y] = complement(graph->colour[x]);
+    cout << "Colour of vertex " << y << ": " << graph->colour[y] << endl;
 }
 
 // breadth first search
@@ -199,7 +200,7 @@ void two_colour(graph* graph) {
             bfs(graph, i);
         }
     }
-// SEE PROCESS_EDGE() FUNCTION TO SEE HOW COLOURS ARE ASSIGNED AND CHECKED
+// SEE PROCESS_EDGE() and COMPLEMENT() FUNCTION TO SEE HOW COLOURS ARE ASSIGNED AND CHECKED
 }
 
 
@@ -210,7 +211,7 @@ int main() {
     insert_edge(&graph, 1, 2, true);
     print_graph(&graph);
 
-    initialise_search(&graph);
-    bfs(&graph, 0);
+    two_colour(&graph);
+
 }
 
