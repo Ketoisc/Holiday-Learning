@@ -34,7 +34,6 @@ void pq_swap(priority_queue* queue, int currNode, int parentNode) {
     return;
 }
 
-
 // bubbling up means comparing if parent of currNode is greater (for min heap). 
 // If parent is greater, swap the nodes and recursively call again until currNode is in right spot
 void bubble_up(priority_queue* p_queue, int currNode) {
@@ -76,3 +75,71 @@ void make_heap(priority_queue* queue, int array[], int size) {
 }
 
 
+// FOR MIN HEAP, EXTRACT THE MINIMUM
+
+// bubbling down means comparing if child of currNode is lesser (for min heap). 
+// If child is lesser, swap the nodes and recursively call again until currNode is in right spot
+// ALSO KNOWN AS HEAPIFY
+void bubble_down(priority_queue* p_queue, int currNode) {
+    int childIndex;
+    int minIndex;
+
+    childIndex = pq_young_child(currNode); // the left child
+    minIndex = currNode;
+
+    for (int i = 0; i < 2; i++) { // for loop to compare BOTH left and right children by adding 0 and then 1 (children are next to each other in array)
+    // ensures that both children are checked and the smaller is bubbled up
+        if ((childIndex + i) <= p_queue->numElements) { // if the child index is within the priority queue
+            if (p_queue->queue[minIndex] > p_queue->queue[childIndex + i]) { // check if current index is greater than the child
+                minIndex = childIndex + i; // change min to that child
+            }
+        }
+    }
+
+    // if a swap has been discovered, make the swap in the priority queue
+    if (minIndex != currNode) {
+        pq_swap(p_queue, currNode, minIndex); // swap current node 
+        bubble_down(p_queue, minIndex); // call again until node is in correct spot
+    }
+}
+
+// get minimum from top of heap (min heap)
+int extract_min(priority_queue* queue) {
+    int min;
+
+    if (queue->numElements <= 0) {
+        cout << "Empty priority queue" << endl;
+    }
+    else {
+        min = queue->queue[1]; // take the first element since min is at the top of heap
+        queue->queue[1] = queue->queue[queue->numElements]; // replace old min with the last element in the heap
+        queue->numElements = queue->numElements - 1; // decrement num of elements
+        bubble_down(queue, 1);
+
+    }
+    return min;
+
+}
+
+// heapsort
+int* heapsort(int array[], int size) {
+    priority_queue queue;
+    make_heap(&queue, array, size); // make a priority queue and turn it into a min heap
+
+    for (int i = 0; i < size; i++) {
+        array[i] = extract_min(&queue); // repeatedly extract minimum and calling heapify to get a sorted array
+    }
+    return array;
+}
+
+int main() {
+    int array[4] = {3,6,2,8};
+    int size = 4;
+
+    heapsort(array, size);
+
+    for (int i = 0; i < size; i++) {
+        cout << array[i] << " ";
+    }
+    cout << endl;
+}
