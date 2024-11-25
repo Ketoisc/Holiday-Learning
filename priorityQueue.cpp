@@ -3,6 +3,7 @@
 using namespace std;
 
 // PRIORITY QUEUE
+// USE A HEAP/RB tree TO IMPLEMENT INSTEAD
 // allows new elements to enter a system. stores elements of an array in sorted order (largest value on top) IF it is a max-heap
 // in general, largest element is also on top for all queues no matter if the array is sorted. queue will sort for you
 // can push and pop elements
