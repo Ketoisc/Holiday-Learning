@@ -174,7 +174,7 @@ void dfs(graph* graph, int currVert) {
 
 int main() {
     graph graph;
-    read_graph(&graph, true);
+    read_graph(&graph, false);
     print_graph(&graph);
 
     initialise_search(&graph);
