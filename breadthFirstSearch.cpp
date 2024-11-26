@@ -68,21 +68,19 @@ void read_graph(graph* graph, bool isDirected) { // aka setting up the graph wit
     cin >> (graph->numVertices) >> numEdges; // takes user input for num of vertices and edges
 
     // note: no input sanitation. assumes the inputs are valid
-    for (int j = 0; j < graph->numVertices; j++) {
-        cout << "Vertex " << j << endl;
         for (int i = 1; i <= numEdges; i++) { // repeatedly ask for user input
-            cout << "Edge " << i << " - Enter the connecting vertex to create an edge: ";
-            cin >> y;
-            insert_edge(graph, j, y, isDirected); // insert the given edge
+            cout << " - Enter the start and end vertex to create an edge: ";
+            cin >> x >> y;
+            insert_edge(graph, x, y, isDirected); // insert the given edge
         }
-    }
+    
     return;
 }
 
 void print_graph(graph* graph) { // prints each vertices and their connections/edges with other vertices
     edgenode* node; // temporary node holder to be used for printing
 
-    for (int i = 0; i < graph->numVertices; i++) { // for each array index (num of vertices)
+    for (int i = 1; i <= graph->numVertices; i++) { // for each array index (num of vertices)
         cout << "Vertex " << i << ": " << endl; // print starting vertex
         node = graph->edges[i]; // set node to first index
         while (node != NULL) { // while the current node (in the list) has a vertex
@@ -97,7 +95,7 @@ void print_graph(graph* graph) { // prints each vertices and their connections/e
 
 // initialising the graph so each vertex is initialised as undiscovered/unprocessed with no parents
 void initialise_search(graph* graph) {
-    for (int i = 0; i < graph->numVertices; i++) {
+    for (int i = 1; i <= graph->numVertices; i++) {
         graph->processed[i] = false;
         graph->discovered[i] = false;
         graph->parent[i] = -1;
@@ -170,12 +168,10 @@ void bfs(graph* graph, int start) {
 
 int main() {
     graph graph;
-    initialise_graph(&graph, true);
     read_graph(&graph, true);
-    insert_edge(&graph, 1, 2, true);
     print_graph(&graph);
 
     initialise_search(&graph);
-    bfs(&graph, 0);
+    bfs(&graph, 1);
 }
 
