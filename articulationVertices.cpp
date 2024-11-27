@@ -22,6 +22,9 @@ struct graph {
     int time = 0;
     int entry_time[6];
     int exit_time[6];
+
+    int reachable_ancestor[6]; // earliest reachable ancestor of vertex, USING A BACK EDGE
+    int tree_out_degree[6]; // dfs tree outdegree of vertex
 };
 
 void initialise_graph(graph* graph, bool isDirected) {
@@ -102,21 +105,90 @@ void initialise_search(graph* graph) {
     }
 }
 
-void process_vertex_early(int vertex) { // can be adjusted to have other functionality
-    cout << "Processed vertex " << vertex << endl;
+void process_vertex_early(graph* graph, int vertex) { //function is called whenever we encounter a back edge that takes us to an earlier ancestor than we have previously seen
+// age of ancestors can be determined from their entry times
+    graph->reachable_ancestor[vertex] = vertex;
     return;
 }
 
-void process_vertex_late(int vertex) {} // can be adjusted to have other functionality
+void process_vertex_late(graph* graph, int vertex) { // evaluates three conditions to identify articulation vertices (root, bridge or parent cut-nodes)
+    bool isRoot; // is the vertex the root of the DFS tree?
+    int earliest_time_v; // earliest reachable time for vertex v
+    int earliest_time_parent; // earliest reachable time for parent of v / parent[v]
 
-void process_edge(graph* graph, int x, int y) { // processes edges to find cycles
-// depends on processing each undirected each exactly once
-// if y is an ancestor, x to ancestor makes a cycle
-    if (graph->discovered[y] == true && (graph->parent[x] != y)) { // if y (ancestor) has been discovered before, and the parent of x is not y
-        cout << "Cycle from " << y << " to " << x << ":";
-        //find_path(y,x,parent);    // finding path from y to x?
-        cout << endl;
-        graph->finished = true; // terminate after finding first cycle
+    if (graph->parent[vertex] < 1) { // test if vertex v is the root, if curr vertex has no parent it is the root
+        if (graph->tree_out_degree[vertex] > 1) { // if it has more than 1 child/edges
+            cout << "Root articulation vertex: " << vertex << endl; // root is always articulation vertex if it has more than 1 child
+        }
+        return;
+    }
+
+    // test if parent[vertex] is root
+    isRoot = (graph->parent[graph->parent[vertex]] < 1); // tests if parent of the vertex has no parent aka less than 1 parent. therefore parent[vertex] is a root
+
+    if (isRoot == false) { // if parent isnt a root
+
+    // CHECKS FOR PARENT ARTICULATION VERTICES
+        if (graph->reachable_ancestor[vertex] == graph->parent[vertex]) { // if current vertex's earliest reachable ancestor is its parent
+            // the only way for the subtree of vertex to connect to the rest of the graph is through its parent
+            cout << "Parent articulation vertex: " << graph->parent[vertex] << endl; // therefore the parent vertex is a parent articulation vertex
+        }
+
+    // CHECKS FOR BRIDGE ARTICULATION VERTICES
+        if (graph->reachable_ancestor[vertex] == vertex) { // if the current vertex's earliest reachable ancestor is itself
+        // then deleting the edge from parent[vertex] to vertex disconnects the graph
+            cout << "Bridge articulation vertex: " << graph->parent[vertex] << endl; // therefore the parent is a bridge articulation vertex because it cuts off vertex and its subtree
+
+            // test if vertex is not a leaf
+            if (graph->tree_out_degree[vertex] > 0) { // if vertex has no children, aka if it is a leaf, then it is also a bridge articulation vertex
+                cout << "Bridge articulation vertex: " << vertex << endl; // 
+            }            
+        }
+    }
+
+    earliest_time_v = graph->entry_time[graph->reachable_ancestor[vertex]]; // set earliest time for VERTEX as the entry time of earliest reachable ancestor
+    earliest_time_parent = graph->entry_time[graph->reachable_ancestor[graph->parent[vertex]]]; // set earliest time for the PARENT as the entry time of its earliest reachable ancestor
+
+    if (earliest_time_v < earliest_time_parent) { // if vertex can reach a node earlier than its parent
+        graph->reachable_ancestor[graph->parent[vertex]] = graph->reachable_ancestor[vertex]; // set the parent's earliest reachable ancestor as the vertex's earliest reachable ancestor
+    }
+} 
+
+// classifying edges
+//
+char* edge_classification(graph* graph, int x, int y) {
+    if (graph->parent[y] == x) { // if x is the parent of y, for edge x to y
+        return "TREE"; // tree edge
+    }
+
+    if ((graph->discovered[y] == true) && (graph->processed[y] == false)) { // if y has been discovered but not processed, for edge x to y
+        return "BACK"; // back edge
+    }
+
+    if ((graph->processed[y] == true) && (graph->entry_time[y] > graph->entry_time[x])) { // if y has been processed and has an entry time greater than x (x was discovered first before y), for edge x to y
+        return "FORWARD"; // forward edge
+    }
+
+    if ((graph->processed[y] == true) && (graph->entry_time[y] < graph->entry_time[x])) { // if y has been processed and has an entry time lower than x (y was discovered first before x)
+        return "CROSS";
+    }
+
+    cout << "Unclassified edge" << endl; // else unclassified
+}
+
+
+void process_edge(graph* graph, int x, int y) { // processes edges 
+    char* edgeClass; // edge class
+    edgeClass = edge_classification(graph, x, y); // classify the edge
+
+    if (edgeClass == "TREE") {
+        graph->tree_out_degree[x] = graph->tree_out_degree[x] + 1; // if it is tree edge, add another tree_out_degree to x since edge is from x to y
+    }
+
+    if ((edgeClass == "BACK") && (graph->parent[x] != y)) { // if it is a back edge and y is not the parent of x, for edge x to y (y did not discover x)
+        if (graph->entry_time[y] < graph->entry_time[graph->reachable_ancestor[x]]) { // if y was discovered before x's earliest reachable ancestor
+            graph->reachable_ancestor[x] = y; // set x's earliest reachable ancestor as y
+        }
     }
     return;
 }
@@ -143,7 +215,7 @@ void dfs(graph* graph, int currVert) {
     graph->time = graph->time + 1;
     graph->entry_time[currVert] = graph->time; // calculate and insert the entry/discovery time of the current vertex
 
-    process_vertex_early(currVert); // processing if wanted
+    process_vertex_early(graph, currVert); // processing if wanted
     tempNode = graph->edges[currVert]; // check edges/connecting vertices of the current vertex by making tempnode
 
     while (tempNode != NULL) { // while there are still vertices/edges to be discovered
@@ -166,7 +238,7 @@ void dfs(graph* graph, int currVert) {
         tempNode = tempNode->next; // go to next node to find more edges
     }
 
-    process_vertex_late(currVert);
+    process_vertex_late(graph, currVert);
     graph->time = graph->time + 1;
     graph->exit_time[currVert] = graph->time; // indicates when the vertex has finished processing
     graph->processed[currVert] = true; // marks vertex (including all of its edges) as processed
