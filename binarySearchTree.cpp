@@ -95,3 +95,54 @@ void insert_tree(tree** l, int x, tree* parent) {
         insert_tree(&((*l)->right), x, *l); // move to the right child
     }
 }
+
+
+// for deletion, we need to link its two descendant subtrees after removing the parent node
+// some cases like deleting leaves or deleting a parent with one child are simple
+// deleting nodes with two children
+
+
+tree* deleteNode(tree* root, int x) {
+    if (root == NULL) { // if tree is empty or node has not been found
+        return root;
+    }
+
+    // searching for the node to be deleted
+    else if (x < root->item) {
+        root->left = deleteNode(root->left, x);
+    }
+
+    else if (x > root->item) {
+        root->right = deleteNode(root->right, x);
+    }
+
+    else { // node has been found, deletion process begins
+
+    // case 1: no child
+        if (root->left == NULL && root->right == NULL) {
+            delete root; // node is simply deleted, pointer is set to null to remove from tree
+            root = NULL;
+        }
+
+    // case 2: one child 
+        else if (root->left == NULL) { // if the node only has a right child
+            tree* tempNode = root;
+            root = root->right; // node is replaced by its right child
+            delete tempNode; // current node is deleted
+        }
+
+        else if (root->right == NULL) { // if the node only has a left child
+            tree* tempNode = root;
+            root = root->left; // node is replaced by its left child
+            delete tempNode; // current node is deleted
+        }
+
+        // case 3: two children
+        else {
+            tree* tempNode = find_minimum(root->right); // finds in-order successor, smallest node in right subtree
+            root->item = tempNode->item; // replaces node's value with the successor value
+            root->right = deleteNode(root->right, tempNode->item); // recursively delete successor from right subtree. ensures connections in right subtree are maintained
+        }
+    }
+    return root;
+}
