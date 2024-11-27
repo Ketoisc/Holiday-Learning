@@ -109,11 +109,15 @@ void process_vertex_early(int vertex) { // can be adjusted to have other functio
 
 void process_vertex_late(int vertex) {} // can be adjusted to have other functionality
 
-void process_edge(int x, int y) { // processes edges, counts num of edges traversed
-    cout << "Processed edge " << x << " " << y << endl;
-    static int edgesCount = 0;
-    edgesCount++;
-    cout << "Current edge count: " << edgesCount << "\n" << endl;
+void process_edge(graph* graph, int x, int y) { // processes edges to find cycles
+// depends on processing each undirected each exactly once
+// if y is an ancestor, x to ancestor makes a cycle
+    if (graph->discovered[y] == true && (graph->parent[x] != y)) { // if y (ancestor) has been discovered before, and the parent of x is not y
+        cout << "Cycle from " << y << " to " << x << ":";
+        //find_path(y,x,parent);    // finding path from y to x?
+        cout << endl;
+        graph->finished = true; // terminate after finding first cycle
+    }
     return;
 }
 
@@ -147,14 +151,14 @@ void dfs(graph* graph, int currVert) {
         // processing tree edges
         if (graph->discovered[successorVert] == false) { // if the next node hasnt been discovered
             graph->parent[successorVert] = currVert; // set the next node's parent as the old current vertex
-            process_edge(currVert, successorVert); // process the edge between the current and successor vertex
+            process_edge(graph, currVert, successorVert); // process the edge between the current and successor vertex
             dfs(graph, successorVert); // recursively call dfs again
         }
 
         // processing back edges, handles the revisiting of nodes in directed graphs
         else if ((graph->processed[successorVert] == false && (graph->parent[currVert] != successorVert))  // if successor vertex hasn't been processed/directed graph
         || graph->isDirected == true) {
-            process_edge(currVert, successorVert);
+            process_edge(graph, currVert, successorVert);
             if (graph->finished ==  true) {
                 return;
             }
