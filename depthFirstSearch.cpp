@@ -29,7 +29,7 @@ void initialise_graph(graph* graph, bool isDirected) {
     graph->numEdges = 0;
     graph->isDirected = isDirected;
 
-    for (int i = 0; i < 6; i++) {
+    for (int i = 1; i <= 6; i++) {
         graph->degree[i] = 0;
         graph->edges[i] = NULL;
     }
