@@ -135,7 +135,7 @@ string edge_classification(graph* graph, int x, int y) {
     }
 
     cout << "Unclassified edge" << endl; // else unclassified
-    return NULL;
+    return "";
 }
 
 

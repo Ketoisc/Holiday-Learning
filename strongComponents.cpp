@@ -29,7 +29,7 @@ struct graph {
 
     stack<int> dfsStack;
 
-    stack<int> activeStack;
+    stack<int> activeStack; // keeps track of vertices in the current dfs tree
     int low[6]; // oldest vertex in component of v
     int scc[6]; // strong component number for each vertex for iedntification
     int components_found;
@@ -119,24 +119,24 @@ void process_vertex_early(graph* graph, int vertex) {
 
 void pop_component(graph* graph, int vertex) {
     int currVert; // vertex placeholder
-    graph->components_found = graph->components_found + 1;
-    graph->scc[vertex] = graph->components_found;
+    graph->components_found = graph->components_found + 1; // add 1, new component has been found
+    graph->scc[vertex] = graph->components_found; // labelling the vertex with its component number
 
-    while (currVert != vertex) {
+    while (currVert != vertex) { // going through all nodes in the stack until it reaches the root of the SCC (vertex)
         currVert = graph->activeStack.top();
-        graph->scc[currVert] = graph->components_found;
-        graph->activeStack.pop();
+        graph->scc[currVert] = graph->components_found; // label all of the current vertex's children to be in the same component
+        graph->activeStack.pop(); // remove from stack
     }
 }
 
 void process_vertex_late(graph* graph, int vertex) { 
-    if (graph->low[vertex] == vertex) { // if the edge from parent[v] to v cuts off a strongly connected component
-        pop_component(graph, vertex);
+    if (graph->low[vertex] == vertex) { // if the edge from parent[v] to v cuts off a strongly connected component, it means that vertex is the ROOT of a new SCC
+        pop_component(graph, vertex); // identifies component by removing/popping vertices from the stack. forms SCCs and labels components
     }
 
     if (graph->parent[vertex] > 0) { // only if vertex is not the root
-        if (graph->entry_time[graph->low[vertex]] < graph->entry_time[graph->low[graph->parent[vertex]]]) {
-            graph->low[graph->parent[vertex]] = graph->low[vertex];
+        if (graph->entry_time[graph->low[vertex]] < graph->entry_time[graph->low[graph->parent[vertex]]]) { // if the entry time of the oldest reachable vertex of the current vertex is less than that of its parent
+            graph->low[graph->parent[vertex]] = graph->low[vertex]; // set the parent's oldest reachable vertex to its child (vertex)
         }
     }
 } 
@@ -161,7 +161,7 @@ string edge_classification(graph* graph, int x, int y) {
     }
 
     cout << "Unclassified edge" << endl; // else unclassified
-    return NULL;
+    return "";
 }
 
 
@@ -206,8 +206,9 @@ void dfs(graph* graph, int currVert) {
     graph->discovered[currVert] = true; // set current vertex as discovered
     graph->time = graph->time + 1;
     graph->entry_time[currVert] = graph->time; // calculate and insert the entry/discovery time of the current vertex
+    graph->low[currVert] = graph->time; // low is set to discovery time
 
-    process_vertex_early(graph, currVert); // processing if wanted
+    process_vertex_early(graph, currVert); // vertex has been discovered, push onto active stack
     tempNode = graph->edges[currVert]; // check edges/connecting vertices of the current vertex by making tempnode
 
     while (tempNode != NULL) { // while there are still vertices/edges to be discovered
@@ -253,8 +254,12 @@ void strong_components(graph* graph) {
         }
     }
 
-
-
+    for (int i = 1; i <= graph->numVertices; i++) {
+        if (graph->scc[i] != -1) {
+            cout << "Vertex " << i << " is in SCC #" << graph->scc[i] << endl;
+        }
+    }
+    return;
 }
 
 int main() {
