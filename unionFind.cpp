@@ -1,24 +1,6 @@
 #include <iostream>
 using namespace std;
 
-// edgenode struct to hold the edge weight (if applicable) and pointer to next edgenode
-struct edgenode {
-    int y; // which vertex is being pointed to by the node
-    int weight; // weighting of edge
-    edgenode* next; // pointer to next edge node in list
-};
-
-struct graph {
-    edgenode* edges[6]; // array of pointers to edgenodes
-    int degree[6]; // degrees of each vertex (number of edges)
-    int numVertices; // num of vertices in the graph
-    int numEdges; // num of edges in the graph
-    bool isDirected; // is the graph directed? (edges only go from one to the other, not both ways)
-    bool processed[6]; // arrays for traversal and search
-    bool discovered[6];
-    int parent[6];
-};
-
 
 struct set_union {
     int parent[6];
@@ -68,10 +50,4 @@ int union_sets(set_union* s, int s1, int s2) {
 // check if two trees are part of the same component/tree
 bool same_component(set_union* s, int s1, int s2) {
     return (find(s,s1) == find(s,s2)); // return true or false if s1 and s2 share the same root
-}
-
-int kruskal(graph* graph) {
-    int weight = 0;
-
-    
 }
