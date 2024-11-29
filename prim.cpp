@@ -35,10 +35,10 @@ void prim(graph* graph, int start) {
         graph->parent[i] = -1;
     }
 
-    distance[start] = 0;
+    distance[start] = 0; // first node of the MST
     currVert = start;
 
-    while (inTree[currVert] == false) { // while the current vertex is not in the prim tree yet
+    while (inTree[currVert] == false) { // continue making mst until all vertices are in tree
         inTree[currVert] = true; // insert into tree
         tempNode = graph->edges[currVert]; // check edges of the current vertex
 
@@ -46,21 +46,28 @@ void prim(graph* graph, int start) {
             potentialNextVert = tempNode->y; // set potential next vertex as the target node (aka ending vertex of edge)
             weight = tempNode->weight; // check edge weight
 
-            if ((distance[potentialNextVert] > weight) && (inTree[potentialNextVert] == false)) { // if current node's weight is smaller than the next vertex's weight, and the next one is not in the tree
+            // WRITING IN ALL THE WEIGHTS/DISTANCES FOR EACH EDGE GOING OUT OF CURRVERT INTO THE DISTANCE ARRAY 
+            // If the edge weight is smaller than the current recorded distance (initially infinity) AND next one is not in the tree
+            if ((distance[potentialNextVert] > weight) && (inTree[potentialNextVert] == false)) { 
                 distance[potentialNextVert] = weight; // set the next vertex's weight
-                graph->parent[potentialNextVert] = currVert; // set its parent
+                graph->parent[potentialNextVert] = currVert; // set its parent to track which vertex (currvert) added it to the tree
             }
-            tempNode = tempNode->next; // go to next node to loop for all edges
+            tempNode = tempNode->next; // go to next edge to loop for all edges
         }
 
-        // selecting the next vertex to process
+        // selecting the next vertex to process: must not be in MST, and must
         currVert = 1; // set to 1 in case no valid vertex is found
         int dist = INT_MAX; // tracks smallest distance so far. any edge weight will replace it bc of infinity
-        for (int i = 1; i <= graph->numVertices; i++) { // for each vertex
-            if ((inTree[i]) == false && (dist > distance[i])) { // check it is not in the tree & the weight of the edge is smaller than dist
+        for (int i = 1; i <= graph->numVertices; i++) { // for each vertex (WILL ONLY CHECK PREVIOUSLY CHECKED EDGES, UNCHECKED ONES ARE INFINITY)
+            if ((inTree[i]) == false && (dist > distance[i])) { // check it is not in the tree & the weight of the edge distance[i] is smaller than dist
                 dist = distance[i]; // sets new minimum distance for this vertex's adjacent nodes, ensures the lowest adjacent edge weight is found from all 
                 currVert = i; // picks next vertex for loop to continue making the MST
+                // this vertex is connected to the tree bc the previous section pic
             }
         }
     }
 }
+
+// takes O(V^2)
+// the algorithm iterates V times (so each vertex is inserted into the tree), 
+// and then scans through all V vertices to find the next adjacent vertex with smallest weight.
