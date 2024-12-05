@@ -9,13 +9,15 @@ using namespace std;
 #define MAXLEN 50
 
 struct cell {
-    int cost;
-    int parent;
+    int cost; // cumulative cost of converting the first i characters from s into the first j characters of t
+    int parent; // indicates operation that resulted in this cell
 };
 
 cell m[MAXLEN + 1][MAXLEN+1];
 
 // table initialisation (rows)
+// the cost of inserting all characters of the target into an empty source string
+// eg it costs 4 to insert 4 characters in an empty string
 void row_init(int i, cell m[MAXLEN+1][MAXLEN+1]) {
     m[0][i].cost = i; // is used in a for loop. sets 0th row as the same incrementing value
     if (i > 0) {
@@ -27,6 +29,8 @@ void row_init(int i, cell m[MAXLEN+1][MAXLEN+1]) {
 }
 
 // column initialisation
+// cost of deleting all characters in the source to turn it into an empty target
+// if target was empty, we would need to delete all characters to get to it
 void column_init(int i, cell m[MAXLEN+1][MAXLEN+1]) {
     m[i][0].cost = i; // used in a for loop. sets the 0th column as the same incrementing value
     if (i > 0) {
@@ -132,9 +136,10 @@ int string_compare(char* string, char* target, cell m[MAXLEN+1][MAXLEN+1]) {
             
             // fills the array of the three possible costs
             // matrix m will show the cumulative edit distances
-            optionCost[MATCH] = m[i-1][j-1].cost + matchCost(string[i], target[j]); // add the previous 
-            optionCost[INSERT] = m[i][j-1].cost + insDelCost(target[j]);
-            optionCost[DELETE] = m[i-1][j].cost + insDelCost(string[i]);
+            // thus builds a solution incrementally using previous solutions
+            optionCost[MATCH] = m[i-1][j-1].cost + matchCost(string[i], target[j]); // adds cell to the upper left diagonal + cost. no change is needed, so cost is same as previous diagonal cell. unless its substitution, we add 1
+            optionCost[INSERT] = m[i][j-1].cost + insDelCost(target[j]); // adds cell to the left + cost. there is an extra character to account for, do not advance the i (source) index, "remove" the character from target (thus moving to j-1). we pretend that we added it
+            optionCost[DELETE] = m[i-1][j].cost + insDelCost(string[i]); // adds cell above + cost. there is a character to remove, dont advance j (target) index, delete from source (go backwards in i, stay at j)
 
             // initially sets the cost to be MATCH, and the parent/change to be match. is written in the matrix
             m[i][j].cost = optionCost[MATCH];
