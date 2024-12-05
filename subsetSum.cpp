@@ -51,8 +51,8 @@ void report_subset(int n, int k) {
     }
 
     // walk up the matrix until we find an interesting parent (where sum[n][k] == true but does not use s(n) as an element when parent[n][k] is null)
-    if (parent[n][k] == NULL) {
-        report_subset(n-1, k);
+    if (parent[n][k] == NULL) { // null means that k is achievable without the i'th element
+        report_subset(n-1, k); // go back
     }
     else {
         report_subset(n-1, parent[n][k]);
