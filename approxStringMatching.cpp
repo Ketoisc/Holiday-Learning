@@ -128,10 +128,11 @@ int string_compare(char* string, char* target, cell m[MAXLEN+1][MAXLEN+1]) {
         // for each letter in the target string
         for (j = 1; j < strlen(target); j++) {
             // calculate the costs of matching/substituting, inserting, or deleting for that matrix position
-            // we use the previously filled cells to fill out the matrix, starting from top left and filling to bottom right
+            // we use the previously filled cells to fill out the matrix, filling each row one by one
             
             // fills the array of the three possible costs
-            optionCost[MATCH] = m[i-1][j-1].cost + matchCost(string[i], target[j]);
+            // matrix m will show the cumulative edit distances
+            optionCost[MATCH] = m[i-1][j-1].cost + matchCost(string[i], target[j]); // add the previous 
             optionCost[INSERT] = m[i][j-1].cost + insDelCost(target[j]);
             optionCost[DELETE] = m[i-1][j].cost + insDelCost(string[i]);
 
