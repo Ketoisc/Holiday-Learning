@@ -56,6 +56,7 @@ int insDelCost(char c) { // cost for insertion or deletion is 1
 }
 
 // location of final cell containing minimum number of changes
+// subtracts 1 to get index
 void goal_cell(char* string, char* target, int* i, int* j) {
     // returning indices of bottom right corner of matrix
     *i = strlen(string) - 1;
