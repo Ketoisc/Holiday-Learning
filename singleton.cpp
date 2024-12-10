@@ -18,7 +18,7 @@ class singleton {
     public:
         static singleton* getInstance(int data) { // only way to access the instance in other functions is through getInstance
             if (instance == NULL) {
-                instance = new singleton(data);
+                instance = new singleton(data); // ensures only one singleton is made
             }
             return instance; // returns the same, static local instance variable
         }
@@ -29,5 +29,5 @@ singleton* singleton::instance = nullptr;
 
 int main() {
     singleton* singleton1 = singleton::getInstance(5);
-
+    return 0;
 }
