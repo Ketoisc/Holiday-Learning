@@ -48,7 +48,7 @@ void BellmanFord(struct Graph* graph, int u) {
   // Mark the source vertex
   dist[u] = 0;
 
-  // Step 2: relax edges |V| - 1 times
+  // Step 2: relax edges |V| - 1 times. ensures that the shortest paths with up to V-1 edges are found
   for (int i = 1; i <= V - 1; i++) {
     for (int j = 0; j < E; j++) {
       // Get the edge data
@@ -61,6 +61,7 @@ void BellmanFord(struct Graph* graph, int u) {
   }
 
   // Step 3: detect negative cycle
+  // checks if any edge can still be relaxed, which shouldnt be possible bc shortest path is only up to V-1 edges from before
   // if value changes then we have a negative cycle in the graph
   // and we cannot find the shortest distances
   for (int i = 0; i < E; i++) {
