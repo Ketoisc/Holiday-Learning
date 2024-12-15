@@ -2,14 +2,14 @@
 using namespace std;
 
 // edgenode struct to hold the edge weight (if applicable) and pointer to next edgenode
-struct edgenode {
+struct edge {
+    int x;
     int y; // which vertex is being pointed to by the node
     int weight; // weighting of edge
-    edgenode* next; // pointer to next edge node in list
 };
 
 struct graph {
-    edgenode* edges[6]; // array of pointers to edgenodes
+    edge* edges[6]; // array of pointers to edgenodes
     int degree[6]; // degrees of each vertex (number of edges)
     int numVertices; // num of vertices in the graph
     int numEdges; // num of edges in the graph
@@ -70,8 +70,24 @@ bool same_component(set_union* s, int s1, int s2) {
     return (find(s,s1) == find(s,s2)); // return true or false if s1 and s2 share the same root
 }
 
-int kruskal(graph* graph) {
-    int weight = 0;
+// code from adm
+int kruskal(graph *g) {
+    int i; /* counter */
+    union_find s; /* union-find data structure */
+    edge_pair e[MAXV+1]; /* array of edges data structure */
+    int weight = 0; /* cost of the minimum spanning tree */
 
-    
+    union_find_init(&s, g->nvertices);
+    to_edge_array(g, e);
+
+    qsort(&e,g->nedges, sizeof(edge_pair), &weight_compare);
+
+    for (i = 0; i < (g->nedges); i++) {
+        if (!same_component(&s, e[i].x, e[i].y)) {
+            printf("edge (%d,%d) in MST\n", e[i].x, e[i].y);
+            weight = weight + e[i].weight;
+            union_sets(&s, e[i].x, e[i].y);
+        }
+    }
+return(weight)
 }
