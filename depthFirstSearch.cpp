@@ -156,6 +156,7 @@ void dfs(graph* graph, int currVert) {
         }
 
         // processing back edges, handles the revisiting of nodes in directed graphs
+        // if it has already been discovered but not processed, or if graph is directed
         else if ((graph->processed[successorVert] == false && (graph->parent[currVert] != successorVert))  // if successor vertex hasn't been processed/directed graph
         || graph->isDirected == true) {
             process_edge(graph, currVert, successorVert);

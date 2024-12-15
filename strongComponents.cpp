@@ -114,31 +114,12 @@ void initialise_search(graph* graph) {
 }
 
 void process_vertex_early(graph* graph, int vertex) {
-    graph->activeStack.push(vertex);
+    cout << " " << vertex;
 }
 
-void pop_component(graph* graph, int vertex) {
-    int currVert; // vertex placeholder
-    graph->components_found = graph->components_found + 1; // add 1, new component has been found
-    graph->scc[vertex] = graph->components_found; // labelling the vertex with its component number
-
-    while (currVert != vertex) { // going through all nodes in the stack until it reaches the root of the SCC (vertex)
-        currVert = graph->activeStack.top();
-        graph->scc[currVert] = graph->components_found; // label all of the current vertex's children to be in the same component
-        graph->activeStack.pop(); // remove from stack
-    }
-}
 
 void process_vertex_late(graph* graph, int vertex) { 
-    if (graph->low[vertex] == vertex) { // if the edge from parent[v] to v cuts off a strongly connected component, it means that vertex is the ROOT of a new SCC
-        pop_component(graph, vertex); // identifies component by removing/popping vertices from the stack. forms SCCs and labels components
-    }
-
-    if (graph->parent[vertex] > 0) { // only if vertex is not the root
-        if (graph->entry_time[graph->low[vertex]] < graph->entry_time[graph->low[graph->parent[vertex]]]) { // if the entry time of the oldest reachable vertex of the current vertex is less than that of its parent
-            graph->low[graph->parent[vertex]] = graph->low[vertex]; // set the parent's oldest reachable vertex to its child (vertex)
-        }
-    }
+    graph->dfsStack.push(vertex);
 } 
 
 // classifying edges
@@ -166,23 +147,7 @@ string edge_classification(graph* graph, int x, int y) {
 
 
 void process_edge(graph* graph, int x, int y) { // processes edges 
-    string edgeClass; // edge class
-    edgeClass = edge_classification(graph, x, y); // classify the edge
-
-    if (edgeClass == "BACK") { // if it is a back edge, it is a cycle
-        if (graph->entry_time[y] < graph->entry_time[graph->low[x]]) { // if y was discovered before x, set the oldest reachable vertex of x to y (back edge)
-            graph->low[x] = y;
-        }
-    }
-
-    if (edgeClass == "CROSS") {
-        if (graph->scc[y] == -1) { // if a component has not been assigned to the vertex
-            if (graph->entry_time[y] < graph->entry_time[graph->low[x]]) { // if y was discovered before x, set the oldest reachable vertex of x to y (back edge)
-                graph->low[x] = y;
-            }
-        }
-    }
-    return;
+    
 }
 
 
@@ -241,25 +206,52 @@ void dfs(graph* graph, int currVert) {
 
 }
 
-void strong_components(graph* graph) {
-    for (int i = 1; i <= graph->numVertices; i++) {
-        graph->low[i] = i;
-        graph->scc[i] = -1;
-    }
-    graph->components_found = 0;
-    initialise_search(graph);
-    for (int i = 1; i <= graph->numVertices; i++) {
-        if (graph->discovered[i] == false) {
-            dfs(graph, i);
-        }
-    }
+// consutrcts the transpose of the graph. has same vertices and edges but all edges are reversed (direction)
+// we know a graph is strongly connected only if, from any vertex v, all vertices are reachable, and all vertices can reach v
+graph* transpose(graph* g) {
+    graph* graph_t;
+    edgenode* tempNode;
 
-    for (int i = 1; i <= graph->numVertices; i++) {
-        if (graph->scc[i] != -1) {
-            cout << "Vertex " << i << " is in SCC #" << graph->scc[i] << endl;
+    graph_t = new graph;
+    initialise_graph(graph_t, true);
+    graph_t->numVertices = g->numVertices;
+
+    for (int x = 1; x <= g->numVertices; x++) { // for every vertex
+        tempNode = g->edges[x];
+        while (tempNode != NULL) { // for every outgoing edge of the vertex
+            insert_edge(graph_t, tempNode->y, x, true); // make an edge with swapped direction
+            tempNode = tempNode->next;
         }
     }
-    return;
+    return graph_t;
+}
+
+
+void strong_components(graph* graph) {
+    int vert;
+    initialise_search(graph);
+
+    for (int i = 1; i <= graph->numVertices; i++) { // run dfs on every undiscovered vertex
+        if (graph->discovered[i] == false) {
+            dfs(graph, i); // dfs pushes all processed vertices on the stack
+        }
+    }
+    graph* graph_t = transpose(graph);
+    initialise_search(graph_t);
+
+    graph->components_found = 0;
+
+    while (!(graph->dfsStack.empty())) { // second dfs for transposed graph
+        vert = graph->dfsStack.top(); // take top vertex of stack and remove from stack
+        graph->dfsStack.pop();
+
+        if (graph->discovered[vert] == false) { // go through every undiscovered vertex
+            graph->components_found += 1; // every dfs call is a strongly connected component
+            cout << "Component " << graph->components_found << ":";
+            dfs(graph_t, vert);
+            cout << endl;
+        }
+    }
 }
 
 int main() {

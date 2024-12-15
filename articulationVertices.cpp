@@ -129,6 +129,8 @@ void process_vertex_late(graph* graph, int vertex) { // evaluates three conditio
     if (isRoot == false) { // if parent isnt a root
 
     // CHECKS FOR PARENT ARTICULATION VERTICES
+    // undirected graph. basically no back edge exists that goes above the parent
+    // therefore that parent is important
         if (graph->reachable_ancestor[vertex] == graph->parent[vertex]) { // if current vertex's earliest reachable ancestor is its parent
             // the only way for the subtree of vertex to connect to the rest of the graph is through its parent
             cout << "Parent articulation vertex: " << graph->parent[vertex] << endl; // therefore the parent vertex is a parent articulation vertex
