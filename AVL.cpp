@@ -36,20 +36,29 @@ int height(tree* node) {
 }
 
 
-// right rotate is for subtrees that look like
-//   subRoot
+// right rotate is for subtrees that look like this. makes x the centre.
+//     subRoot
+//    /
+//   x
 //  /
-// x
-//  \
-//   y
+// z
+
+
+// turns into this
+//      x
+//    /   \
+//   z    subRoot
 
 tree* rightRotate(tree* subRoot) {
-    tree* x = subRoot->left;
-    tree* y = x->right;
+    tree* x = subRoot->left; // x is the new root of the rotated subtree
+    tree* y = x->right; // y is the right child of x (may be nullptr), will become left child of subroot
+    // preserves it if anything is there
 
-    // performs rotation
+    // performs rotation. move x up, subroot down as right child, y is left child
     x->right = subRoot;
-    subRoot->left = y;
+    subRoot->left = y; // can be a nullptr. preserves what the subroot replaces
+
+    // dont need to explicitly call anything to be x's left child. it stays there
 
     // updating parent pointers for each node after rotation
     if (y != nullptr) {
