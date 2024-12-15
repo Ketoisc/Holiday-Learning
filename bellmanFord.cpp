@@ -42,9 +42,9 @@ void BellmanFord(struct Graph* graph, int u) {
   int dist[V];
 
   // Step 1: fill the distance array and predecessor array
-  for (int i = 0; i < V; i++)
+  for (int i = 0; i < V; i++) {
     dist[i] = INT_MAX;
-
+  }
   // Mark the source vertex
   dist[u] = 0;
 
@@ -55,8 +55,9 @@ void BellmanFord(struct Graph* graph, int u) {
       int u = graph->edge[j].u;
       int v = graph->edge[j].v;
       int w = graph->edge[j].w;
-      if (dist[u] != INT_MAX && dist[u] + w < dist[v])
+      if (dist[u] != INT_MAX && dist[u] + w < dist[v]) {
         dist[v] = dist[u] + w;
+      }
     }
   }
 
