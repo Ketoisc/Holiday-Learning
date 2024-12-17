@@ -5,7 +5,7 @@ using namespace std;
 struct set_union {
     int parent[6];
     int size[6]; // number of elements in subtree that are rooted at i. used to determine how the subtree get merged into the larger one
-    int num; // total num of elements in the set union
+    int num; // total num of elements in the set_union. remains constant
 };
 
 // starts as its own set. each element is initially its own root, and each set holds one element
