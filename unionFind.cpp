@@ -39,7 +39,7 @@ int union_sets(set_union* s, int s1, int s2) {
 
     if (s->size[r1] >= s->size[r2]) { // if r1's tree is bigger than or equal to r2
         s->size[r1] = s->size[r1] + s->size[r2]; // resize r1 tree to hold r2
-        s->parent[r2] = r1; // set r1 as the parent of r2. merge r2 into r2
+        s->parent[r2] = r1; // set r1 as the parent of r2. merge r2 into r1
     }
     else { // if r2's tree is bigger than r1
         s->size[r2] = s->size[r1] + s->size[r2]; // resize r2 tree to hold r1
