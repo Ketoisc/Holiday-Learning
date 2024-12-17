@@ -78,15 +78,16 @@ int kruskal(graph *g) {
     int weight = 0; /* cost of the minimum spanning tree */
 
     union_find_init(&s, g->nvertices);
-    to_edge_array(g, e);
+    to_edge_array(g, e); // array of edges
 
-    qsort(&e,g->nedges, sizeof(edge_pair), &weight_compare);
+    qsort(&e,g->nedges, sizeof(edge_pair), &weight_compare); // sort all edges by weight
 
     for (i = 0; i < (g->nedges); i++) {
-        if (!same_component(&s, e[i].x, e[i].y)) {
+        if (!same_component(&s, e[i].x, e[i].y)) { // if the current edge does NOT make a cycle, insert it
             printf("edge (%d,%d) in MST\n", e[i].x, e[i].y);
-            weight = weight + e[i].weight;
-            union_sets(&s, e[i].x, e[i].y);
+            weight = weight + e[i].weight; // update the total cost of the MST
+            union_sets(&s, e[i].x, e[i].y); // merge the new edge/vertex into the tree
+            // repeat for all edges, edges are only added if no cycle is made
         }
     }
 return(weight)
