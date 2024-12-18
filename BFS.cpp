@@ -2,15 +2,18 @@
 #include <queue>
 using namespace std;
 
+
+// adjacency lists can efficiently represent sparse graphs 
+// using linked lists to store the neighbours adjacent to each vertex
+
+// edgenode struct to hold the edge weight (if applicable) and pointer to next edgenode
 struct edgenode {
-    int v; // neighbouring vertex
-    int capacity; // capacity of edge
-    int flow; // flow through edge
-    int residual; // residual capacity of edge
-    edgenode* next; // next edge in list
+    int y; // which vertex is being pointed to by the node
+    int weight; // weighting of edge
+    edgenode* next; // pointer to next edge node in list
 };
 
-struct flow_graph {
+struct graph {
     edgenode* edges[6]; // array of pointers to edgenodes
     int degree[6]; // degrees of each vertex (number of edges)
     int numVertices; // num of vertices in the graph
@@ -21,7 +24,7 @@ struct flow_graph {
     int parent[6];
 };
 
-void initialise_graph(flow_graph* graph, bool isDirected) {
+void initialise_graph(graph* graph, bool isDirected) {
     graph->numVertices = 0; // setting graph as empty
     graph->numEdges = 0;
     graph->isDirected = isDirected;
@@ -32,6 +35,73 @@ void initialise_graph(flow_graph* graph, bool isDirected) {
     }
     return;
 }
+
+void insert_edge(graph* graph, int x, int y, bool isDirected) {
+    edgenode* node; 
+    node = new edgenode(); // allocate space for new node
+    node->weight = 0; // initialise all values of the node to be inserted
+    node->y = y; // ending vertex of the edge
+    node->next = graph->edges[x]; // the node to be inserted now points to the pointer currently inhabiting edges[x]. will initially be null
+    // this is so that the new node is inserted at the head of the list, since order does not matter when making edges
+    // ensures the linked list is connected and no existing nodes are lost
+
+    graph->edges[x] = node; // insert the new node
+    graph->degree[x] += 1; // increment that vertex's degree by 1 (degree means number of edges)
+
+    if (isDirected == false) { // if the graph is undirected, another edge needs to be added to the ending vertex to have a two-way edge connection
+        insert_edge(graph, y, x, true); // recursively call itself to insert the right edge
+    }
+    else {
+        graph->numEdges++; // increment number of edges
+    }
+    return;
+}
+
+void read_graph(graph* graph, bool isDirected) { // aka setting up the graph with values
+    int numEdges;
+    int x; // starting vertex x in edge
+    int y; // ending vertex y in edge
+
+    initialise_graph(graph, isDirected); // initialises graph
+
+    cout << "Enter the number of vertices and edges seperated by a space: ";
+    cin >> (graph->numVertices) >> numEdges; // takes user input for num of vertices and edges
+
+    // note: no input sanitation. assumes the inputs are valid
+        for (int i = 1; i <= numEdges; i++) { // repeatedly ask for user input
+            cout << " - Enter the start and end vertex to create an edge: ";
+            cin >> x >> y;
+            insert_edge(graph, x, y, isDirected); // insert the given edge
+        }
+    
+    return;
+}
+
+void print_graph(graph* graph) { // prints each vertices and their connections/edges with other vertices
+    edgenode* node; // temporary node holder to be used for printing
+
+    for (int i = 1; i <= graph->numVertices; i++) { // for each array index (num of vertices)
+        cout << "Vertex " << i << ": " << endl; // print starting vertex
+        node = graph->edges[i]; // set node to first index
+        while (node != NULL) { // while the current node (in the list) has a vertex
+            cout << node->y << " ";
+            node = node->next; // go to next node in the list in that index
+        }
+        cout << "\n" << endl;
+        // go to next index
+    }
+    return;
+}
+
+// initialising the graph so each vertex is initialised as undiscovered/unprocessed with no parents
+void initialise_search(graph* graph) {
+    for (int i = 1; i <= graph->numVertices; i++) {
+        graph->processed[i] = false;
+        graph->discovered[i] = false;
+        graph->parent[i] = -1;
+    }
+}
+
 void process_vertex_early(int vertex) { // can be adjusted to have other functionality
     cout << "Processed vertex " << vertex << endl;
     return;
@@ -48,7 +118,7 @@ void process_edge(int x, int y) { // processes edges, counts num of edges traver
 }
 
 // breadth first search
-void bfs(flow_graph* graph, int start) {
+void bfs(graph* graph, int start) {
     queue<int> queue; // initialise queue (FIFO)
     int currVert; // current vertex being explored
     int successorVert; // neighbouring vertex connected to currVert
@@ -95,81 +165,12 @@ void bfs(flow_graph* graph, int start) {
 
 }
 
-// only consider edges that have some capacity available (aka positive residual flow)
-bool valid_edge(edgenode* edge) {
-    if (edge->residual > 0) {
-        return true;
-    }
-    else {
-        return false;
-    }
-}
 
-int path_volume(flow_graph* graph, int start, int end, int parents[]) {
-    edgenode* e;
+int main() {
+    graph graph;
+    read_graph(&graph, true);
+    print_graph(&graph);
 
-    if (parents[end] == -1) {
-        return 0;
-    }
-    
-    e = find_edge(graph, parents[end], end);
-
-    if (start == parents[end]) {
-        return e->residual;
-    }
-    else {
-        return min(path_volume(graph, start, parents[end], parents), e->residual);
-    }
-}
-
-edgenode* find_edge(flow_graph* graph, int x, int y) {
-    edgenode* tempNode;
-
-    tempNode = graph->edges[x];
-
-    while (tempNode != NULL) {
-        if (tempNode->v == y) {
-            return tempNode;
-        }
-    }
-    return NULL;
-}
-
-
-void augment_path(flow_graph* graph, int start, int end, int parents[], int volume) {
-    edgenode* edge;
-
-    if (start == end) {
-        return;
-    }
-
-    edge = find_edge(graph, parents[end], end);
-    edge->flow += volume;
-    edge->residual -= volume;
-
-    edge = find_edge(graph, end, parents[end]);
-    edge->residual += volume;
-
-    augment_path(graph, start, parents[end], parents, volume);
-}
-
-// use a bfs to look for any path from s to t that increases total flow. use this to augment the total flow
-// terminate with the optimal flow when no such augmenting path exists
-
-void netflow(flow_graph* graph, int source, int sink) {
-    int volume;
-
-    add_residual_edges(graph);
-
-    initialise_search(graph);
-    bfs(graph, source);
-
-    volume = path_volume(graph, source, sink, parent);
-
-    while (volume > 0) {
-        augment_path(graph, source, sink, parent, volume);
-        initialise_search(graph);
-        bfs(graph, source);
-        volume = path_volume(graph, source, sink, parent);
-    }
+    initialise_search(&graph);
+    bfs(&graph, 1);
 }
