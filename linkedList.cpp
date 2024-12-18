@@ -72,3 +72,16 @@ void delete_list(list** l, int x) {
     }
 
 }
+
+
+int main() {
+    list* list = NULL;
+
+    insert_list(&list, 3);
+    insert_list(&list, 8);
+    insert_list(&list, 2);
+    insert_list(&list, 1);
+
+    cout << predecessor_list(list, 8)->item << endl;
+
+}

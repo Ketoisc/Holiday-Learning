@@ -8,6 +8,10 @@ struct tree {
     tree* parent;
     tree* left;
     tree *right;
+
+    tree() {
+
+    }
 };
 
 // operations for binary trees are
@@ -145,4 +149,16 @@ tree* deleteNode(tree* root, int x) {
         }
     }
     return root;
+}
+
+
+int main() {
+    tree* tree = NULL;
+    insert_tree(&tree, 3, NULL);
+    insert_tree(&tree, 7, NULL);
+    insert_tree(&tree, 2, NULL);
+    insert_tree(&tree, 1, NULL);
+
+    cout << (find_minimum(tree)->item) << endl;
+
 }
