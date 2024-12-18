@@ -10,7 +10,7 @@ using namespace std;
 
 struct trieNode {
     trieNode* child[26]; // pointer array for child nodes of each node. 26 letters in alphabet, each index holds a letter/node. nodes will have nodes inside them to act as a tree
-
+    // the array acts like a lookup table. we put the character in the array and just check if it exists, so O(1) lookup
     bool wordEnd; // indicates if a string has ended
 
     trieNode() {
